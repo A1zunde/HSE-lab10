@@ -16,3 +16,4 @@ C:\Users\fogge\source\repos\lab10\obj\Debug\net8.0\refint\lab10.dll
 C:\Users\fogge\source\repos\lab10\obj\Debug\net8.0\lab10.pdb
 C:\Users\fogge\source\repos\lab10\obj\Debug\net8.0\lab10.genruntimeconfig.cache
 C:\Users\fogge\source\repos\lab10\obj\Debug\net8.0\ref\lab10.dll
+C:\Users\fogge\source\repos\lab10\obj\Debug\net8.0\lab10.sourcelink.json

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lab10Classes", "..\lab10Cla
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lab9", "..\lab9\lab9.csproj", "{9EB499F4-2EF2-4EE2-9563-3D600188FA62}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "lab10Test", "..\lab10Test\lab10Test.csproj", "{92A720C2-EA5B-493A-AE45-D9D1C226FFA1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{9EB499F4-2EF2-4EE2-9563-3D600188FA62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EB499F4-2EF2-4EE2-9563-3D600188FA62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EB499F4-2EF2-4EE2-9563-3D600188FA62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92A720C2-EA5B-493A-AE45-D9D1C226FFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92A720C2-EA5B-493A-AE45-D9D1C226FFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92A720C2-EA5B-493A-AE45-D9D1C226FFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92A720C2-EA5B-493A-AE45-D9D1C226FFA1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

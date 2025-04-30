@@ -1,61 +1,33 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Reflection;
 using lab10Classes;
+using System.Collections;
 
 namespace lab10
 {
     class Program
     {
+        static Random rnd = new Random();
+
         static void Main()
         {
             DemoP1();
-
             DemoP2();
-
             DemoP3();
         }
 
         static void DemoP1()
         {
-            Random rnd = new Random();
             BankCard[] cards = new BankCard[20];
-
             for (int i = 0; i < cards.Length; i++)
             {
-                int cardType = rnd.Next(0, 4);
-
-                switch (cardType)
-                {
-                    case 0:
-                        cards[i] = new BankCard();
-                        break;
-                    case 1:
-                        cards[i] = new DebitCard();
-                        break;
-                    case 2:
-                        cards[i] = new YouthCard();
-                        break;
-                    case 3:
-                        cards[i] = new CreditCard();
-                        break;
-                }
-
+                cards[i] = GenerateRandomCard(rnd);
                 cards[i].RandomInit();
             }
 
-
-            Console.WriteLine("Просмотр массива с помощью виртуальных функций:");
-            foreach (var card in cards)
+            Console.WriteLine("Просмотр массива:");
+            for (int i = 0; i < cards.Length; i++)
             {
-                card.Show();
-                Console.WriteLine();
-            }
-
-            Console.WriteLine("Просмотр массива с помощью обычных функций:");
-            foreach (var card in cards)
-            {
-                card.NonVirtualShow();
+                cards[i].Show();
                 Console.WriteLine();
             }
         }
@@ -63,131 +35,138 @@ namespace lab10
         static void DemoP2()
         {
             BankCard[] cards = new BankCard[20];
-            Random rnd = new();
             for (int i = 0; i < cards.Length; i++)
             {
-                int cardType = rnd.Next(0, 4);
-                switch (cardType)
-                {
-                    case 0:
-                        cards[i] = new BankCard();
-                        break;
-                    case 1:
-                        cards[i] = new DebitCard();
-                        break;
-                    case 2:
-                        cards[i] = new YouthCard();
-                        break;
-                    case 3:
-                        cards[i] = new CreditCard();
-                        break;
-                }
+                cards[i] = GenerateRandomCard(rnd);
                 cards[i].RandomInit();
             }
 
-            decimal totalCreditLimit = GetTotalCreditCardLimit(cards);
-            Console.WriteLine($"1. Общий лимит по кредитным картам: {totalCreditLimit}\n");
+            decimal totalCreditLimit;
+            bool hasCreditLimit = GetTotalCreditCardLimit(cards, out totalCreditLimit);
+            if (hasCreditLimit)
+                Console.WriteLine("1. Общий лимит по кредитным картам: " + totalCreditLimit);
+            else
+                Console.WriteLine("1. Нет кредитных карт для расчета лимита");
 
-            Console.WriteLine("\n2. Количество карт каждого типа:\n");
-            CountCardsByType(cards);
+            Console.WriteLine("\n2. Общая сумма сбережений на дебетовых картах");
+            decimal count;
+            bool isBalance = GetTotalDebitCardBalance(cards, out count);
+            Console.WriteLine(count);
 
-            int averageRepaymentPeriod = GetAverageCreditCardRepaymentPeriod(cards);
-            Console.WriteLine($"\n3. Средний срок погашения по кредитным картам: {averageRepaymentPeriod} месяцев");
+            int averageRepaymentPeriod;
+            bool hasAveragePeriod = GetAverageCreditCardRepaymentPeriod(cards, out averageRepaymentPeriod);
+            if (hasAveragePeriod)
+                Console.WriteLine("\n3. Средний срок погашения по кредитным картам: " + averageRepaymentPeriod + " месяцев");
+            else
+                Console.WriteLine("\n3. Нет кредитных карт для расчета срока погашения");
+
+            CreditCard maxLimitCard = GetMaxLimitCreditCard(cards);
+            if (maxLimitCard != null)
+            {
+                Console.WriteLine("\n4. Кредитная карта с максимальным лимитом:");
+                maxLimitCard.Show();
+            }
+            else
+            {
+                Console.WriteLine("\n4. Нет кредитных карт для поиска максимального лимита");
+            }
         }
 
-        public static int GetTotalCreditCardLimit(BankCard[] cards)
+        public static bool GetTotalCreditCardLimit(BankCard[] cards, out decimal totalLimit)
         {
-            int totalLimit = 0;
-
-            foreach (var card in cards)
+            totalLimit = 0;
+            int count = 0;
+            for (int i = 0; i < cards.Length; i++)
             {
-                if (card is CreditCard creditCard)
+                CreditCard creditCard = cards[i] as CreditCard;
+                if (creditCard != null)
                 {
                     totalLimit += creditCard.Limit;
+                    count++;
+                }
+            }
+            return count > 0;
+        }
+
+        public static bool GetTotalDebitCardBalance(BankCard[] cards, out decimal totalBalance)
+        {
+            totalBalance = 0;
+            int count = 0;
+
+            for (int i = 0; i < cards.Length; i++)
+            {
+                DebitCard debitCard = cards[i] as DebitCard;
+                if (debitCard != null)
+                {
+                    totalBalance += debitCard.Balance;
+                    count++;
                 }
             }
 
-            return totalLimit;
+            return count > 0;
         }
 
-        public static void CountCardsByType(BankCard[] cards)
+
+        public static bool GetAverageCreditCardRepaymentPeriod(BankCard[] cards, out int averagePeriod)
         {
-            int bankCardCount = 0;
-            int debitCardCount = 0;
-            int youthCardCount = 0;
-            int creditCardCount = 0;
-
-            foreach (var card in cards)
-            {
-                if (card is BankCard && !(card is DebitCard)) { bankCardCount++; }
-                if (card is DebitCard) { debitCardCount++; }
-                if (card is YouthCard) { youthCardCount++; }
-                if (card is CreditCard) { creditCardCount++; }
-            }
-
-            Console.WriteLine($"Банковских карт: {bankCardCount}");
-            Console.WriteLine($"Дебетовых карт: {debitCardCount}");
-            Console.WriteLine($"Молодёжных карт: {youthCardCount}");
-            Console.WriteLine($"Кредитных карт: {creditCardCount}");
-        }
-
-        public static int GetAverageCreditCardRepaymentPeriod(BankCard[] cards)
-        {
+            averagePeriod = 0;
             int totalPeriod = 0;
-            int creditCardCount = 0;
+            int count = 0;
 
-            foreach (var card in cards)
+            for (int i = 0; i < cards.Length; i++)
             {
-                if (card is CreditCard creditCard)
+                CreditCard creditCard = cards[i] as CreditCard;
+                if (creditCard != null)
                 {
                     totalPeriod += creditCard.MaturityDate;
-                    creditCardCount++;
+                    count++;
                 }
             }
 
-            return creditCardCount > 0 ? totalPeriod / creditCardCount : 0;
+            if (count > 0)
+            {
+                averagePeriod = totalPeriod / count;
+                return true;
+            }
+            return false;
+        }
+
+        public static CreditCard GetMaxLimitCreditCard(BankCard[] cards)
+        {
+            CreditCard maxCard = null;
+            decimal maxLimit = -1;
+
+            for (int i = 0; i < cards.Length; i++)
+            {
+                CreditCard creditCard = cards[i] as CreditCard;
+                if (creditCard != null)
+                {
+                    if (creditCard.Limit > maxLimit)
+                    {
+                        maxLimit = creditCard.Limit;
+                        maxCard = creditCard;
+                    }
+                }
+            }
+
+            return maxCard;
         }
 
         static void DemoP3()
         {
             lab9ElementsShowcase();
-
             CloningShowcase();
         }
+
         static void lab9ElementsShowcase()
         {
-            object[] objects = new object[20];
-            Random rnd = new Random();
+            IInit[] objects = new IInit[20];
             for (int i = 0; i < objects.Length; i++)
             {
-                int type = rnd.Next(0, 5);
-                switch (type)
-                {
-                    case 0:
-                        objects[i] = new BankCard();
-                        break;
-                    case 1:
-                        objects[i] = new DebitCard();
-                        break;
-                    case 2:
-                        objects[i] = new YouthCard();
-                        break;
-                    case 3:
-                        objects[i] = new CreditCard();
-                        break;
-                    case 4:
-                        objects[i] = new GeoCoordinates();
-                        break;
-                }
-
-                // Инициализация у каждого из созданных элементов
-                if (objects[i] is IInit initObject)
-                {
-                    initObject.RandomInit();
-                }
+                objects[i] = GenerateRandomInitObject(rnd);
+                objects[i].RandomInit();
             }
 
-            // Подсчет объектов каждого типа
             int bankCardCount = 0;
             int debitCardCount = 0;
             int youthCardCount = 0;
@@ -196,42 +175,30 @@ namespace lab10
 
             for (int i = 0; i < objects.Length; i++)
             {
-                if (objects[i] is BankCard)
-                {
-                    bankCardCount++;
-                }
-                else if (objects[i] is DebitCard)
-                {
-                    debitCardCount++;
-                }
-                else if (objects[i] is YouthCard)
-                {
+                if (objects[i] is YouthCard)
                     youthCardCount++;
-                }
                 else if (objects[i] is CreditCard)
-                {
                     creditCardCount++;
-                }
+                else if (objects[i] is DebitCard)
+                    debitCardCount++;
+                else if (objects[i] is BankCard)
+                    bankCardCount++;
                 else if (objects[i] is GeoCoordinates)
-                {
                     geoCoordinatesCount++;
-                }
             }
 
-            // Вывод результатов подсчета
             Console.WriteLine("\nПодсчет объектов каждого типа:");
-            Console.WriteLine($"Банковских карт: {bankCardCount}");
-            Console.WriteLine($"Дебетовых карт: {debitCardCount}");
-            Console.WriteLine($"Молодёжных карт: {youthCardCount}");
-            Console.WriteLine($"Кредитных карт: {creditCardCount}");
-            Console.WriteLine($"Геокоординат: {geoCoordinatesCount}");
+            Console.WriteLine("Банковских карт: " + bankCardCount);
+            Console.WriteLine("Дебетовых карт: " + debitCardCount);
+            Console.WriteLine("Молодёжных карт: " + youthCardCount);
+            Console.WriteLine("Кредитных карт: " + creditCardCount);
+            Console.WriteLine("Геокоординат: " + geoCoordinatesCount);
 
-            SortBinatyV1();
+            SortBinaryV1();
         }
 
-        static void SortBinatyV1()
+        static void SortBinaryV1()
         {
-            // Создание массвива координат
             GeoCoordinates[] geoArray = new GeoCoordinates[10];
             for (int i = 0; i < geoArray.Length; i++)
             {
@@ -239,59 +206,57 @@ namespace lab10
                 geoArray[i].RandomInit();
             }
 
-            // Сортировка массива
             Array.Sort(geoArray);
 
-            // Вывод отсортированного массива
             Console.WriteLine("Отсортированный массив GeoCoordinates:");
-            foreach (var geo in geoArray)
+            for (int i = 0; i < geoArray.Length; i++)
             {
-                geo.PrintCoordinates();
+                geoArray[i].PrintCoordinates();
             }
 
-            // Бинарный поиск
-            GeoCoordinates searchGeo = new GeoCoordinates();
-            searchGeo.RandomInit();
+            Console.WriteLine();
+
+            Random rand = new Random();
+            GeoCoordinates searchGeo = geoArray[rand.Next(geoArray.Length)];
             int index = Array.BinarySearch(geoArray, searchGeo);
             if (index >= 0)
             {
-                Console.WriteLine($"Объект найден на позиции {index}");
+                Console.WriteLine("Объект найден на позиции " + index + ":");
+                geoArray[index].PrintCoordinates();
             }
             else
             {
                 Console.WriteLine("Объект не найден.");
             }
 
-            SortBinatyV2();
+            SortBinaryV2();
         }
 
-        static void SortBinatyV2()
+        static void SortBinaryV2()
         {
-            // Создание массвива координат
             GeoCoordinates[] geoArray = new GeoCoordinates[10];
             for (int i = 0; i < geoArray.Length; i++)
             {
                 geoArray[i] = new GeoCoordinates();
                 geoArray[i].RandomInit();
             }
-            GeoCoordinates searchGeo = new GeoCoordinates();
-            searchGeo.RandomInit();
 
-            // Сортировка по долготе
             Array.Sort(geoArray, new LongitudeComparer());
 
-            // Вывод отсортированного массива
             Console.WriteLine("Отсортированный массив GeoCoordinates по долготе:");
-            foreach (var geo in geoArray)
+            for (int i = 0; i < geoArray.Length; i++)
             {
-                geo.PrintCoordinates();
+                geoArray[i].PrintCoordinates();
             }
 
-            // Бинарный поиск
+            Console.WriteLine();
+
+            GeoCoordinates searchGeo = geoArray[rnd.Next(geoArray.Length)];
             int index = Array.BinarySearch(geoArray, searchGeo, new LongitudeComparer());
             if (index >= 0)
             {
-                Console.WriteLine($"Объект найден на позиции {index}");
+                Console.WriteLine("Объект найден на позиции " + index + ":");
+                geoArray[index].PrintCoordinates();
             }
             else
             {
@@ -301,65 +266,78 @@ namespace lab10
 
         static void CloningShowcase()
         {
-            // Создаем объекты с использованием RandomInit
             BankCard bankCard = new BankCard();
             bankCard.RandomInit();
+            bankCard.OwnerName = "Alexei Alexandrovich";
+            bankCard.CardNumber = "1234123412341234";
 
             DebitCard debitCard = new DebitCard();
             debitCard.RandomInit();
+            debitCard.Balance = 0;
 
             YouthCard youthCard = new YouthCard();
             youthCard.RandomInit();
+            youthCard.Cashback = 10;
 
             CreditCard creditCard = new CreditCard();
             creditCard.RandomInit();
+            creditCard.Limit = 20000;
 
-            // Глубокое копирование
             BankCard clonedBankCard = (BankCard)bankCard.Clone();
             DebitCard clonedDebitCard = (DebitCard)debitCard.Clone();
             YouthCard clonedYouthCard = (YouthCard)youthCard.Clone();
             CreditCard clonedCreditCard = (CreditCard)creditCard.Clone();
 
-            // Поверхностное копирование
             BankCard shallowBankCard = bankCard.ShallowCopy();
             DebitCard shallowDebitCard = (DebitCard)debitCard.ShallowCopy();
             YouthCard shallowYouthCard = (YouthCard)youthCard.ShallowCopy();
             CreditCard shallowCreditCard = (CreditCard)creditCard.ShallowCopy();
 
-            // Изменяем оригинальные объекты
-            bankCard.OwnerName = "Alexei Alexandrovich";
-            debitCard.Balance = 0;
-            youthCard.Cashback = 10;
-            creditCard.Limit = 20000;
-
-            // Вывод результатов
-            Console.WriteLine("\n\n\nКопирование");
-            Console.WriteLine("\nОригиналы:\n\n");
+            Console.WriteLine("\nОригиналы:");
             bankCard.Show();
-            Console.WriteLine("\n");
             debitCard.Show();
-            Console.WriteLine("\n");
             youthCard.Show();
-            Console.WriteLine("\n");
             creditCard.Show();
 
-            Console.WriteLine("\n\nГлубокие копии:\n\n");
+            Console.WriteLine("\nГлубокие копии:");
             clonedBankCard.Show();
-            Console.WriteLine("\n");
             clonedDebitCard.Show();
-            Console.WriteLine("\n");
             clonedYouthCard.Show();
-            Console.WriteLine("\n");
             clonedCreditCard.Show();
 
-            Console.WriteLine("\n\nПоверхностные копии:\n\n");
+            Console.WriteLine("\nПоверхностные копии:");
             shallowBankCard.Show();
-            Console.WriteLine("\n");
             shallowDebitCard.Show();
-            Console.WriteLine("\n");
             shallowYouthCard.Show();
-            Console.WriteLine("\n");
             shallowCreditCard.Show();
+        }
+
+        static BankCard GenerateRandomCard(Random rnd)
+        {
+            int cardType = rnd.Next(0, 4);
+            if (cardType == 0)
+                return new BankCard();
+            else if (cardType == 1)
+                return new DebitCard();
+            else if (cardType == 2)
+                return new YouthCard();
+            else
+                return new CreditCard();
+        }
+
+        static IInit GenerateRandomInitObject(Random rnd)
+        {
+            int type = rnd.Next(0, 5);
+            if (type == 0)
+                return new BankCard();
+            else if (type == 1)
+                return new DebitCard();
+            else if (type == 2)
+                return new YouthCard();
+            else if (type == 3)
+                return new CreditCard();
+            else
+                return new GeoCoordinates();
         }
     }
 }
